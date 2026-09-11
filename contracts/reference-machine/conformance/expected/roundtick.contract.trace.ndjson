@@ -1,0 +1,15 @@
+{"v":"0.1","seq":1,"time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"roundtick","duration":1,"seed":3}}
+{"v":"0.1","seq":2,"time":0,"type":"state.changed","source":"field","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"field.stock","value":2}}
+{"v":"0.1","seq":3,"time":0,"type":"state.changed","source":"harvest-a","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"harvest-a.stash","value":3}}
+{"v":"0.1","seq":4,"time":0,"type":"state.changed","source":"harvest-b","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"harvest-b.stash","value":4}}
+{"v":"0.1","seq":5,"time":0,"type":"round.read","source":"reader","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"value":null,"bonus":2,"time":0,"balance":5,"random":"2074134861973389515","sampled":4.3957063435657275}}
+{"v":"0.1","seq":6,"time":0,"type":"round.harvest","source":"harvest-a","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"granted":3}}
+{"v":"0.1","seq":7,"time":0,"type":"round.harvest","source":"harvest-b","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"granted":4}}
+{"v":"0.1","seq":8,"time":1,"type":"state.changed","source":"field","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"field.stock","value":0}}
+{"v":"0.1","seq":9,"time":1,"type":"state.changed","source":"harvest-a","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"harvest-a.stash","value":6}}
+{"v":"0.1","seq":10,"time":1,"type":"state.changed","source":"harvest-b","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"harvest-b.stash","value":7}}
+{"v":"0.1","seq":11,"time":1,"type":"round.read","source":"reader","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"value":2,"bonus":2,"time":1,"balance":2,"random":"14051751459229557887","sampled":4.133280369155081}}
+{"v":"0.1","seq":12,"time":1,"type":"round.harvest","source":"harvest-a","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"granted":3}}
+{"v":"0.1","seq":13,"time":1,"type":"round.harvest","source":"harvest-b","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"granted":3}}
+{"v":"0.1","seq":14,"time":1,"type":"sim.progress","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"progress":1}}
+{"v":"0.1","seq":15,"time":1,"type":"sim.completed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"reason":"endTime"}}

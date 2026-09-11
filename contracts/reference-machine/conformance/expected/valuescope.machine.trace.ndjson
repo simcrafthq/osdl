@@ -1,0 +1,7 @@
+{"v":"0.1","seq":1,"time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"valuescope","duration":1,"seed":17}}
+{"v":"0.1","seq":2,"time":0,"type":"state.changed","source":"v0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"v0.base","value":3}}
+{"v":"0.1","seq":3,"time":0,"type":"state.changed","source":"v0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"v0.parameter","value":2}}
+{"v":"0.1","seq":4,"time":0,"type":"state.changed","source":"v0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"v0.evaluated","value":15}}
+{"v":"0.1","seq":5,"time":0,"type":"state.changed","source":"v0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"v0.sampled","value":7.839622425333314}}
+{"v":"0.1","seq":6,"time":0,"type":"value.scope","source":"v0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"componentId":"v0","parameter":2,"evaluated":15,"sampled":7.839622425333314}}
+{"v":"0.1","seq":7,"time":0,"type":"sim.completed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"reason":"quiescent"}}

@@ -1,0 +1,14 @@
+{"v":"0.1","seq":1,"time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"pipeline","duration":5,"seed":7}}
+{"v":"0.1","seq":2,"time":0,"type":"entity.created","source":"src","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#1","entityType":"job","at":"src"}}
+{"v":"0.1","seq":3,"time":0,"type":"state.changed","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"snk.count","value":1}}
+{"v":"0.1","seq":4,"time":0,"type":"entity.disposed","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#1","at":"snk"}}
+{"v":"0.1","seq":5,"time":0,"type":"entity.moved","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#1","from":"src","to":"snk"}}
+{"v":"0.1","seq":6,"time":0,"type":"entity.created","source":"src","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#2","entityType":"job","at":"src"}}
+{"v":"0.1","seq":7,"time":0,"type":"state.changed","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"snk.count","value":2}}
+{"v":"0.1","seq":8,"time":0,"type":"entity.disposed","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#2","at":"snk"}}
+{"v":"0.1","seq":9,"time":0,"type":"entity.moved","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#2","from":"src","to":"snk"}}
+{"v":"0.1","seq":10,"time":0,"type":"entity.created","source":"src","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#3","entityType":"job","at":"src"}}
+{"v":"0.1","seq":11,"time":0,"type":"state.changed","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"snk.count","value":3}}
+{"v":"0.1","seq":12,"time":0,"type":"entity.disposed","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#3","at":"snk"}}
+{"v":"0.1","seq":13,"time":0,"type":"entity.moved","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#3","from":"src","to":"snk"}}
+{"v":"0.1","seq":14,"time":0,"type":"sim.completed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"reason":"quiescent"}}

@@ -1,0 +1,13 @@
+{
+  "osdl": "0.1",
+  "model": {
+    "name": "unknown-library",
+    "components": [
+      {
+        "id": "missingLibrary",
+        "type": "future.widget",
+        "params": {}
+      }
+    ]
+  }
+}

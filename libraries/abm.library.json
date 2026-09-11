@@ -1,0 +1,148 @@
+{
+  "$schema": "https://osdl.dev/schemas/0.1/osdl.library.schema.json",
+  "osdl": "0.1",
+  "library": {
+    "namespace": "abm",
+    "name": "Agent-Based Components",
+    "version": "0.1.0",
+    "description": "Agent-based modelling on the shared discrete-event kernel. Agents are stateful individuals whose statechart transitions schedule events on the kernel clock, so agent behaviour interleaves exactly with discrete-event and system-dynamics components.",
+    "components": [
+      {
+        "name": "population",
+        "label": "Population",
+        "description": "A collection of agents sharing one agent definition (attributes plus a statechart). Agents may message each other over the population's network topology. A `depart` action sends an agent out of the population as a discrete-event entity through an out port; when that entity later arrives at an in port, the agent re-enters and its `arrive`-triggered transitions fire. Per-state agent counts are observable as `<id>.inState.<stateId>` in outputs and expressions.",
+        "category": "Agents",
+        "ports": [
+          {
+            "id": "out",
+            "direction": "out",
+            "description": "Agents departing the population as entities, triggered by a `depart` action in the agent statechart."
+          },
+          {
+            "id": "in",
+            "direction": "in",
+            "multiple": true,
+            "description": "Entities arriving here re-enter the population as their original agents, firing `arrive` triggers."
+          }
+        ],
+        "params": {
+          "type": "object",
+          "required": [
+            "agent"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "size": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/scalarValue",
+              "default": 0,
+              "description": "Number of agents created at simulation start."
+            },
+            "agent": {
+              "type": "object",
+              "required": [
+                "behavior"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "attributes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+                      },
+                      "init": {
+                        "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/value",
+                        "description": "Initial value, sampled per agent if stochastic."
+                      },
+                      "description": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "description": "Per-agent state variables, readable in agent-scope expressions and writable via `set` actions."
+                },
+                "behavior": {
+                  "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/statechart"
+                }
+              },
+              "description": "The agent definition shared by every agent in this population."
+            },
+            "network": {
+              "type": "object",
+              "required": [
+                "topology"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "topology": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "complete",
+                    "random",
+                    "smallWorld"
+                  ],
+                  "default": "none"
+                },
+                "p": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Edge probability (`random`) or rewiring probability (`smallWorld`)."
+                },
+                "k": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "description": "Mean degree for `smallWorld`."
+                }
+              },
+              "description": "Connectivity used by `send` actions addressed to `connected`."
+            }
+          }
+        },
+        "state": [
+          {
+            "id": "count",
+            "type": "integer",
+            "description": "Agents currently resident in the population (departed agents are excluded until they return)."
+          },
+          {
+            "id": "held",
+            "type": "integer",
+            "description": "Departed agents whose entities are still buffered at the population's out port, waiting for the downstream component to accept them."
+          },
+          {
+            "id": "inState",
+            "type": "integer",
+            "description": "Agents currently in a given statechart state, published per state as `inState.<stateId>`."
+          }
+        ],
+        "emits": [
+          {
+            "event": "agent.transitioned",
+            "description": "Emitted whenever an agent changes statechart state."
+          },
+          {
+            "event": "message.sent",
+            "description": "Emitted whenever an agent sends a message."
+          },
+          {
+            "event": "log.message",
+            "description": "Emitted whenever an agent writes to the log action."
+          },
+          {
+            "event": "entity.created",
+            "description": "Emitted when an agent departs through a connection as an entity."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "manifest": "../manifest.json",
+  "cases": {
+    "timers.machine": "timers",
+    "pipeline.machine": "pipeline",
+    "backpressure.machine": "backpressure",
+    "valuescope.machine": "valuescope",
+    "paramoverride.machine": "paramoverride",
+    "paramoverridecascade.machine": "paramoverridecascade",
+    "rngpair.machine": "rngpair",
+    "stopper.machine": "stopper",
+    "threshold.machine": "threshold",
+    "exprerr.machine": "exprerr",
+    "errsend.machine": "errsend",
+    "componenterr.machine": "componenterr",
+    "pipeline.osdl": "despipe",
+    "recorders.osdl": "desstats",
+    "roundtick.contract": "roundtick",
+    "rounderr.contract": "rounderr"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schemas/osdl.machine-fixture.schema.json",
+  "format": "osdl-machine-fixture/0.1",
+  "behavior": "pipeline",
+  "behaviorContract": "../README.md#pipeline",
+  "arguments": {}
+}

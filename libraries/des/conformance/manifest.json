@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../schemas/osdl.conformance.schema.json",
+  "osdl": "0.1",
+  "kind": "library",
+  "id": "des",
+  "version": "0.1.0",
+  "extends": ["core@0.1.0"],
+  "cases": [
+    {
+      "id": "pipeline.osdl",
+      "input": {"format": "osdl", "path": "cases/pipeline.osdl.json"},
+      "expected": {"events": "expected/pipeline.osdl.events.ndjson"}
+    },
+    {
+      "id": "recorders.osdl",
+      "input": {"format": "osdl", "path": "cases/recorders.osdl.json"},
+      "expected": {
+        "events": "expected/recorders.osdl.events.ndjson",
+        "results": "expected/recorders.osdl.results.json"
+      }
+    }
+  ],
+  "assertions": [
+    {
+      "case": "recorders.osdl",
+      "results": {"comparison": {"floatMode": "bits"}}
+    }
+  ]
+}

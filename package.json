@@ -1,0 +1,20 @@
+{
+  "name": "osdl-specification",
+  "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simcrafthq/osdl.git"
+  },
+  "type": "module",
+  "engines": {"node": ">=22"},
+  "scripts": {
+    "test": "node --test --test-concurrency=1",
+    "validate:documents": "node scripts/validate-osdl.mjs examples/*.osdl.json",
+    "conformance": "node scripts/check-conformance.mjs",
+    "conformance:update": "node scripts/update-conformance.mjs --output ."
+  },
+  "devDependencies": {
+    "ajv": "8.20.0"
+  }
+}

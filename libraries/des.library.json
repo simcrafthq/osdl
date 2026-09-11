@@ -1,0 +1,379 @@
+{
+  "$schema": "https://osdl.dev/schemas/0.1/osdl.library.schema.json",
+  "osdl": "0.1",
+  "library": {
+    "namespace": "des",
+    "name": "Discrete-Event Components",
+    "version": "0.1.0",
+    "description": "Process-oriented discrete-event simulation: entities are created by sources, wait in queues, are processed by servers, travel through delays, branch at routers, and leave through sinks. Time advances event to event on the shared kernel clock.",
+    "components": [
+      {
+        "name": "source",
+        "label": "Source",
+        "description": "Creates entities at stochastic or deterministic intervals and sends them through `out`. Stops after `limit` entities if set.",
+        "category": "Flow",
+        "ports": [
+          {
+            "id": "out",
+            "direction": "out",
+            "description": "Newly created entities leave here."
+          }
+        ],
+        "params": {
+          "type": "object",
+          "required": [
+            "interarrival"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "interarrival": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/numericValue",
+              "description": "Time between consecutive entity creations, in model time units. Negative sampled durations are treated as 0."
+            },
+            "entityType": {
+              "type": "string",
+              "description": "Type label stamped on created entities; defaults to the component id."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of entities to create. Unlimited if omitted."
+            }
+          }
+        },
+        "state": [
+          {
+            "id": "count",
+            "type": "integer",
+            "description": "Entities created so far."
+          },
+          {
+            "id": "held",
+            "type": "integer",
+            "description": "1 while a created entity is blocked waiting for the downstream component to accept it (the arrival process is paused), else 0."
+          }
+        ],
+        "emits": [
+          {
+            "event": "entity.created",
+            "description": "Emitted for every entity this source creates."
+          }
+        ]
+      },
+      {
+        "name": "queue",
+        "label": "Queue",
+        "description": "Holds entities until the downstream component accepts them. Ordering follows `discipline`; with `priority`, the expression is evaluated per entity and higher values dequeue first. If `capacity` is set and the queue is full, an arrival on `in` is blocked and stays in kernel escrow with custody at the sender; the queue reports readiness for `in` once a place frees, and the kernel redelivers the blocked arrivals oldest first.",
+        "category": "Flow",
+        "ports": [
+          {
+            "id": "in",
+            "direction": "in",
+            "multiple": true,
+            "description": "Entities enter the queue here."
+          },
+          {
+            "id": "out",
+            "direction": "out",
+            "description": "Entities leave toward the downstream component when it accepts them."
+          }
+        ],
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "discipline": {
+              "type": "string",
+              "default": "fifo",
+              "enum": [
+                "fifo",
+                "lifo",
+                "priority"
+              ],
+              "description": "Queueing policy for release order. `fifo` sends oldest first, `lifo` sends most recent first, `priority` uses `priority` values."
+            },
+            "capacity": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum entities held. Unbounded if omitted."
+            },
+            "priority": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/expressionString",
+              "description": "Expression evaluated per entity when `discipline` is `priority`; higher values dequeue first."
+            }
+          },
+          "allOf": [
+            {
+              "else": {
+                "not": {
+                  "required": [
+                    "priority"
+                  ]
+                }
+              },
+              "if": {
+                "properties": {
+                  "discipline": {
+                    "const": "priority"
+                  }
+                },
+                "required": [
+                  "discipline"
+                ]
+              },
+              "then": {
+                "required": [
+                  "priority"
+                ]
+              }
+            }
+          ]
+        },
+        "state": [
+          {
+            "id": "length",
+            "type": "integer",
+            "description": "Number of entities currently waiting."
+          },
+          {
+            "id": "waitTime",
+            "type": "number",
+            "description": "Waiting time of the most recently dequeued entity, in model time units."
+          }
+        ],
+        "emits": []
+      },
+      {
+        "name": "server",
+        "label": "Server",
+        "description": "Processes up to `capacity` entities concurrently, each occupying the server for `serviceTime`. It accepts an arrival on `in` while a service slot is free and blocks it otherwise, reporting readiness for `in` when a slot frees; it releases entities through `out` when service completes. `capacity` may be an expression, so processing capacity can be driven by other components (e.g. a system-dynamics variable) and is re-evaluated as the model evolves.",
+        "category": "Flow",
+        "ports": [
+          {
+            "id": "in",
+            "direction": "in",
+            "multiple": true,
+            "description": "Entities enter service here when capacity is available."
+          },
+          {
+            "id": "out",
+            "direction": "out",
+            "description": "Entities leave here when their service completes."
+          }
+        ],
+        "params": {
+          "type": "object",
+          "required": [
+            "serviceTime"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "serviceTime": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/numericValue",
+              "description": "Time an entity occupies one unit of capacity, sampled per entity. Negative sampled durations are treated as 0."
+            },
+            "capacity": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/scalarValue",
+              "default": 1,
+              "description": "Concurrent service slots. Non-integer values are truncated; values below 1 are treated as 1."
+            }
+          }
+        },
+        "state": [
+          {
+            "id": "busy",
+            "type": "integer",
+            "description": "Entities currently in service."
+          },
+          {
+            "id": "utilization",
+            "type": "number",
+            "description": "Time-weighted fraction of capacity in use since the start of recording, in [0, 1]."
+          },
+          {
+            "id": "held",
+            "type": "integer",
+            "description": "Entities that finished service but are blocked waiting for the downstream component to accept them."
+          }
+        ],
+        "emits": []
+      },
+      {
+        "name": "delay",
+        "label": "Delay",
+        "description": "Holds each entity for `duration`, with unlimited concurrency, then releases it. Models travel or processing time that has no capacity constraint.",
+        "category": "Flow",
+        "ports": [
+          {
+            "id": "in",
+            "direction": "in",
+            "multiple": true,
+            "description": "Entities enter the delay here."
+          },
+          {
+            "id": "out",
+            "direction": "out",
+            "description": "Entities leave here after their delay elapses."
+          }
+        ],
+        "params": {
+          "type": "object",
+          "required": [
+            "duration"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "duration": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/numericValue",
+              "description": "Holding time, sampled per entity. Negative sampled durations are treated as 0."
+            }
+          }
+        },
+        "state": [
+          {
+            "id": "inTransit",
+            "type": "integer",
+            "description": "Entities currently inside the delay."
+          }
+        ],
+        "emits": []
+      },
+      {
+        "name": "router",
+        "label": "Router",
+        "description": "Forwards each arriving entity to exactly one of its outgoing connections, chosen by `policy`. `random` uses `weights` if given (matched to outgoing connections in document order, defaulting to uniform); `conditional` evaluates `conditions` in document order against the outgoing connections and takes the first that holds, falling back to the last connection if none do; `roundRobin` cycles; `shortestQueue` picks the destination reporting the smallest `length` state.",
+        "category": "Flow",
+        "ports": [
+          {
+            "id": "in",
+            "direction": "in",
+            "multiple": true,
+            "description": "Entities to be routed."
+          },
+          {
+            "id": "out",
+            "direction": "out",
+            "multiple": true,
+            "description": "One outgoing connection per destination; selection per entity follows the routing policy."
+          }
+        ],
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "policy": {
+              "type": "string",
+              "default": "random",
+              "enum": [
+                "random",
+                "roundRobin",
+                "shortestQueue",
+                "conditional"
+              ],
+              "description": "Outgoing path selection policy. Use `random`, `roundRobin`, or `shortestQueue` for deterministic policies, or `conditional` for rule matching in document order."
+            },
+            "weights": {
+              "type": "array",
+              "items": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "minItems": 1,
+              "description": "Relative weights for `random` routing, one per outgoing connection in document order."
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/expressionString"
+              },
+              "minItems": 1,
+              "description": "Boolean expressions for `conditional` routing, one per outgoing connection in document order."
+            }
+          },
+          "allOf": [
+            {
+              "else": {
+                "not": {
+                  "required": [
+                    "weights"
+                  ]
+                }
+              },
+              "if": {
+                "properties": {
+                  "policy": {
+                    "const": "random"
+                  }
+                }
+              }
+            },
+            {
+              "else": {
+                "not": {
+                  "required": [
+                    "conditions"
+                  ]
+                }
+              },
+              "if": {
+                "properties": {
+                  "policy": {
+                    "const": "conditional"
+                  }
+                },
+                "required": [
+                  "policy"
+                ]
+              },
+              "then": {
+                "required": [
+                  "conditions"
+                ]
+              }
+            }
+          ]
+        },
+        "state": [
+          {
+            "id": "count",
+            "type": "integer",
+            "description": "Entities routed so far."
+          },
+          {
+            "id": "held",
+            "type": "integer",
+            "description": "Entities buffered inside the router, including one whose delivery is in flight or blocked."
+          }
+        ],
+        "emits": []
+      },
+      {
+        "name": "sink",
+        "label": "Sink",
+        "description": "Absorbs and disposes entities, ending their journey through the model.",
+        "category": "Flow",
+        "ports": [
+          {
+            "id": "in",
+            "direction": "in",
+            "multiple": true,
+            "description": "Entities to dispose."
+          }
+        ],
+        "emits": [
+          {
+            "event": "entity.disposed",
+            "description": "Emitted for every entity this sink absorbs."
+          }
+        ],
+        "state": [
+          {
+            "id": "count",
+            "type": "integer",
+            "description": "Entities disposed so far."
+          }
+        ]
+      }
+    ]
+  }
+}

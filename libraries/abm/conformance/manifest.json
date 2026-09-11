@@ -1,0 +1,9 @@
+{
+  "$schema": "../../../schemas/osdl.conformance.schema.json",
+  "osdl": "0.1",
+  "kind": "library",
+  "id": "abm",
+  "version": "0.1.0",
+  "extends": ["core@0.1.0"],
+  "cases": []
+}

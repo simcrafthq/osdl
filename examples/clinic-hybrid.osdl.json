@@ -1,0 +1,338 @@
+{
+  "$schema": "https://osdl.dev/schemas/0.1/osdl.schema.json",
+  "osdl": "0.1",
+  "model": {
+    "name": "clinic-hybrid",
+    "label": "Urgent-Care Clinic (hybrid DES + ABM + SD)",
+    "description": "All three paradigms in one model. Patients are agents (ABM) who fall sick stochastically and depart into the clinic's discrete-event process (DES): a triage queue feeding doctors. Doctor workload accumulates as fatigue (SD), which feeds back to reduce effective treatment capacity. Treated patients return to the population and eventually recover to a well state.",
+    "time": {
+      "unit": "hours",
+      "integration": {
+        "method": "euler",
+        "dt": 0.1
+      }
+    },
+    "parameters": [
+      {
+        "name": "nPatients",
+        "description": "Population size served by the clinic.",
+        "type": "integer",
+        "default": 500
+      },
+      {
+        "name": "sicknessRate",
+        "description": "Hazard of a well person falling sick.",
+        "default": 0.005,
+        "unit": "1/hour"
+      },
+      {
+        "name": "treatmentTime",
+        "description": "Mean treatment duration per patient.",
+        "default": 0.75,
+        "unit": "hours"
+      },
+      {
+        "name": "baseDoctors",
+        "description": "Doctors on shift when fully rested.",
+        "type": "integer",
+        "default": 3
+      },
+      {
+        "name": "fatigueGain",
+        "description": "Fatigue accumulated per hour at full utilization.",
+        "default": 0.05,
+        "unit": "1/hour"
+      },
+      {
+        "name": "fatigueRecovery",
+        "description": "Fractional fatigue recovery per hour.",
+        "default": 0.1,
+        "unit": "1/hour"
+      }
+    ],
+    "components": [
+      {
+        "id": "patients",
+        "type": "abm.population",
+        "label": "Patient population",
+        "params": {
+          "size": {
+            "param": "nPatients"
+          },
+          "agent": {
+            "attributes": [
+              {
+                "name": "visits",
+                "init": 0,
+                "description": "Completed clinic visits."
+              }
+            ],
+            "behavior": {
+              "initial": "well",
+              "states": [
+                {
+                  "id": "well"
+                },
+                {
+                  "id": "sick",
+                  "description": "Departs to the clinic on entry; remains in this state while queued and treated.",
+                  "onEnter": [
+                    {
+                      "type": "depart",
+                      "port": "out"
+                    }
+                  ]
+                },
+                {
+                  "id": "recovering"
+                }
+              ],
+              "transitions": [
+                {
+                  "from": "well",
+                  "to": "sick",
+                  "trigger": {
+                    "type": "rate",
+                    "rate": {
+                      "param": "sicknessRate"
+                    }
+                  }
+                },
+                {
+                  "from": "sick",
+                  "to": "recovering",
+                  "trigger": {
+                    "type": "arrive",
+                    "port": "in"
+                  },
+                  "actions": [
+                    {
+                      "type": "set",
+                      "target": "visits",
+                      "value": {
+                        "expr": "visits + 1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "from": "recovering",
+                  "to": "well",
+                  "trigger": {
+                    "type": "timeout",
+                    "delay": 48
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "triage",
+        "type": "des.queue",
+        "label": "Triage queue",
+        "params": {
+          "discipline": "fifo"
+        }
+      },
+      {
+        "id": "doctors",
+        "type": "des.server",
+        "label": "Doctors",
+        "params": {
+          "serviceTime": {
+            "dist": "exponential",
+            "rate": {
+              "expr": "1 / treatmentTime"
+            }
+          },
+          "capacity": {
+            "expr": "effectiveDoctors.value"
+          }
+        }
+      },
+      {
+        "id": "fatigue",
+        "type": "sd.stock",
+        "label": "Doctor fatigue",
+        "params": {
+          "initial": 0,
+          "min": 0,
+          "max": 1
+        }
+      },
+      {
+        "id": "tiring",
+        "type": "sd.flow",
+        "params": {
+          "rate": {
+            "expr": "fatigueGain * doctors.utilization"
+          }
+        }
+      },
+      {
+        "id": "resting",
+        "type": "sd.flow",
+        "params": {
+          "rate": {
+            "expr": "fatigueRecovery * fatigue.value"
+          }
+        }
+      },
+      {
+        "id": "effectiveDoctors",
+        "type": "sd.auxiliary",
+        "label": "Effective doctors",
+        "description": "Fatigue feedback: rested doctors work at full capacity; exhausted doctors at half. Never below one doctor.",
+        "params": {
+          "value": {
+            "expr": "max(1, round(baseDoctors * (1 - 0.5 * fatigue.value)))"
+          }
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "toTriage",
+        "from": "patients.out",
+        "to": "triage.in"
+      },
+      {
+        "id": "toDoctors",
+        "from": "triage.out",
+        "to": "doctors.in"
+      },
+      {
+        "id": "discharge",
+        "from": "doctors.out",
+        "to": "patients.in"
+      },
+      {
+        "id": "tiringIn",
+        "from": "tiring.out",
+        "to": "fatigue.in"
+      },
+      {
+        "id": "restingOut",
+        "from": "fatigue.out",
+        "to": "resting.in"
+      }
+    ]
+  },
+  "experiments": [
+    {
+      "name": "one-week",
+      "description": "A week of clinic operation after a day of warmup.",
+      "duration": 168,
+      "warmup": 24,
+      "replications": 10,
+      "seed": 42,
+      "outputs": [
+        {
+          "path": "triage.length",
+          "records": [
+            {
+              "type": "timeseries",
+              "interval": 1
+            },
+            {
+              "type": "summary"
+            }
+          ]
+        },
+        {
+          "path": "doctors.utilization",
+          "records": [
+            {
+              "type": "summary",
+              "statistics": [
+                "mean",
+                "max"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "fatigue.value",
+          "records": [
+            {
+              "type": "timeseries",
+              "interval": 1
+            },
+            {
+              "type": "summary"
+            }
+          ]
+        },
+        {
+          "path": "patients.inState.sick",
+          "records": [
+            {
+              "type": "summary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "main",
+      "label": "Clinic overview",
+      "type": "canvas",
+      "elements": [
+        {
+          "ref": "patients",
+          "x": 0,
+          "y": 100
+        },
+        {
+          "ref": "triage",
+          "x": 260,
+          "y": 100
+        },
+        {
+          "ref": "doctors",
+          "x": 500,
+          "y": 100
+        },
+        {
+          "ref": "tiring",
+          "x": 380,
+          "y": 300
+        },
+        {
+          "ref": "fatigue",
+          "x": 560,
+          "y": 300
+        },
+        {
+          "ref": "resting",
+          "x": 740,
+          "y": 300
+        },
+        {
+          "ref": "effectiveDoctors",
+          "x": 560,
+          "y": 200
+        }
+      ],
+      "routes": [
+        {
+          "ref": "discharge",
+          "vertices": [
+            {
+              "x": 580,
+              "y": 40
+            },
+            {
+              "x": 80,
+              "y": 40
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

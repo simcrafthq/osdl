@@ -1,0 +1,65 @@
+name = "machine"
+version = "0.1.0"
+defaultTargets = ["Machine", "Conformance", "TraceQueries", "osdl-reference-machine"]
+
+# `Machine` is exactly the surface checked through conformance cases.
+[[lean_lib]]
+name = "Machine"
+
+# Portable conformance cases consumed by the Lean reference machine.
+[[lean_lib]]
+name = "Conformance"
+
+# Structured trace-query helpers shared by the check executables.
+[[lean_lib]]
+name = "TraceQueries"
+
+[[lean_exe]]
+name = "osdl-reference-machine"
+root = "Main"
+
+# Golden-vector checker for totalOrder, RNG-stream, and sampler bit parity.
+[[lean_exe]]
+name = "vectors"
+root = "Vectors"
+
+# Golden-vector generator from fixed OSDL reference cases.
+[[lean_exe]]
+name = "genvectors"
+root = "GenerateVectors"
+
+# Checks that one resolution round satisfies the expected invariants.
+[[lean_exe]]
+name = "roundcheck"
+root = "RoundChecks"
+
+# Checks the conformance catalogue metadata and required case IDs.
+[[lean_exe]]
+name = "cataloguecheck"
+root = "CatalogueChecks"
+
+# Checks that run-loop exhaustion stays outside portable machine errors.
+[[lean_exe]]
+name = "safeguardcheck"
+root = "SafeguardChecks"
+
+# Checks prepared-run validation, normalization, and static lookups.
+[[lean_exe]]
+name = "preparationcheck"
+root = "PreparationChecks"
+
+# Checks entity acceptance, blocked transfers held in escrow, and readiness
+# redelivery.
+[[lean_exe]]
+name = "transfercheck"
+root = "TransferChecks"
+
+# Checks golden-vector parsing, rendering, and shared-case evaluation.
+[[lean_exe]]
+name = "vectorroundtripcheck"
+root = "VectorRoundTripChecks"
+
+# Checks step equivalence, runThrough boundaries, external input, and cancellation.
+[[lean_exe]]
+name = "runcontrolcheck"
+root = "RunControlChecks"

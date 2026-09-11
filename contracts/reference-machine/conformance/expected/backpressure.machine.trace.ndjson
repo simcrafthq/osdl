@@ -1,0 +1,11 @@
+{"v":"0.1","seq":1,"time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"backpressure","duration":5,"seed":11}}
+{"v":"0.1","seq":2,"time":0,"type":"entity.created","source":"src","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#1","entityType":"job","at":"src"}}
+{"v":"0.1","seq":3,"time":0,"type":"fixture.blocked","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#1","inputPort":"in"}}
+{"v":"0.1","seq":4,"time":1,"type":"fixture.ready","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"inputPort":"in"}}
+{"v":"0.1","seq":5,"time":1,"type":"sim.progress","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"progress":0.2}}
+{"v":"0.1","seq":6,"time":1,"type":"state.changed","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"snk.count","value":1}}
+{"v":"0.1","seq":7,"time":1,"type":"entity.moved","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#1","from":"src","to":"snk"}}
+{"v":"0.1","seq":8,"time":1,"type":"entity.created","source":"src","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#2","entityType":"job","at":"src"}}
+{"v":"0.1","seq":9,"time":1,"type":"state.changed","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"snk.count","value":2}}
+{"v":"0.1","seq":10,"time":1,"type":"entity.moved","source":"snk","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"entityId":"job#2","from":"src","to":"snk"}}
+{"v":"0.1","seq":11,"time":1,"type":"sim.completed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"reason":"quiescent"}}

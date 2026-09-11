@@ -1,0 +1,13 @@
+{"v":"0.1","seq":1,"time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"timers","duration":10,"seed":42}}
+{"v":"0.1","seq":2,"time":1,"type":"state.changed","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"t0.fired","value":1}}
+{"v":"0.1","seq":3,"time":1,"type":"state.changed","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"t0.lastTimer","value":1}}
+{"v":"0.1","seq":4,"time":1,"type":"fixture.timerFired","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"timer":1,"count":1}}
+{"v":"0.1","seq":5,"time":1,"type":"sim.progress","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"progress":0.1}}
+{"v":"0.1","seq":6,"time":1,"type":"state.changed","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"t0.fired","value":2}}
+{"v":"0.1","seq":7,"time":1,"type":"state.changed","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"t0.lastTimer","value":2}}
+{"v":"0.1","seq":8,"time":1,"type":"fixture.timerFired","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"timer":2,"count":2}}
+{"v":"0.1","seq":9,"time":2.5,"type":"state.changed","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"t0.fired","value":3}}
+{"v":"0.1","seq":10,"time":2.5,"type":"state.changed","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"t0.lastTimer","value":3}}
+{"v":"0.1","seq":11,"time":2.5,"type":"fixture.timerFired","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"timer":3,"count":3}}
+{"v":"0.1","seq":12,"time":2.5,"type":"sim.progress","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"progress":0.25}}
+{"v":"0.1","seq":13,"time":2.5,"type":"sim.completed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"reason":"quiescent"}}

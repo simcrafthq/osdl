@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://osdl.dev/schemas/0.1/osdl.results.schema.json",
+  "title": "OSDL Recorded Results",
+  "description": "Recorded output values from one OSDL simulation run.",
+  "type": "object",
+  "patternProperties": {
+    "^[A-Za-z_][A-Za-z0-9_-]*(\\.[A-Za-z_][A-Za-z0-9_-]*)*$": {"$ref": "#/$defs/output"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "output": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "summary": {"$ref": "#/$defs/summary"},
+        "timeseries": {"$ref": "#/$defs/timeseries"},
+        "final": {"$ref": "#/$defs/final"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "description": "Numeric summary statistics for a number or integer observable.",
+      "required": ["stats"],
+      "additionalProperties": false,
+      "properties": {
+        "stats": {
+          "type": "object",
+          "additionalProperties": {"type": "number"}
+        }
+      }
+    },
+    "timeseries": {
+      "type": "object",
+      "description": "Time-ordered samples from a number or integer observable.",
+      "required": ["times", "values"],
+      "additionalProperties": false,
+      "properties": {
+        "times": {
+          "type": "array",
+          "items": {"type": "number"}
+        },
+        "values": {
+          "type": "array",
+          "items": {"type": "number"}
+        }
+      }
+    },
+    "final": {
+      "type": "object",
+      "description": "The final observable value. Null means that no final value is available.",
+      "required": ["value"],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "$ref": "#/$defs/recordedValue"
+        }
+      }
+    },
+    "recordedValue": {
+      "type": ["number", "boolean", "string", "null"],
+      "description": "A recorded state value, or null when no value is available."
+    }
+  }
+}

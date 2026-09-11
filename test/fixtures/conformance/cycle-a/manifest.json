@@ -1,0 +1,8 @@
+{
+  "osdl": "0.1",
+  "kind": "core",
+  "id": "cycle-a",
+  "version": "0.1.0",
+  "extends": ["cycle-b@0.1.0"],
+  "cases": []
+}

@@ -1,0 +1,2 @@
+{"v":"0.1","seq":1,"time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"rounderr","duration":1,"seed":31}}
+{"v":"0.1","seq":2,"time":0,"type":"sim.error","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"code":"component.failure","message":"resolution round \"failure\" participant \"failed\" run at simulation time 0: round participant failed","time":0}}

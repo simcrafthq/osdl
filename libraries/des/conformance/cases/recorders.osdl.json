@@ -1,0 +1,93 @@
+{
+  "$schema": "https://osdl.dev/schemas/0.1/osdl.schema.json",
+  "osdl": "0.1",
+  "model": {
+    "name": "desstats",
+    "components": [
+      {
+        "id": "src",
+        "type": "des.source",
+        "params": {
+          "interarrival": 1.0,
+          "entityType": "src",
+          "limit": 4
+        }
+      },
+      {
+        "id": "q",
+        "type": "des.queue",
+        "params": {"capacity": 2}
+      },
+      {
+        "id": "srv",
+        "type": "des.server",
+        "params": {"serviceTime": 1.5}
+      },
+      {
+        "id": "snk",
+        "type": "des.sink"
+      }
+    ],
+    "connections": [
+      {"from": "src.out", "to": "q.in"},
+      {"from": "q.out", "to": "srv.in"},
+      {"from": "srv.out", "to": "snk.in"}
+    ]
+  },
+  "experiments": [
+    {
+      "name": "workload",
+      "duration": 12,
+      "warmup": 2,
+      "seed": 5,
+      "outputs": [
+        {
+          "path": "q.length",
+          "records": [
+            {
+              "type": "summary",
+              "statistics": [
+                "mean",
+                "std",
+                "min",
+                "max",
+                "median",
+                "p5",
+                "p25",
+                "p75",
+                "p90",
+                "p95",
+                "p99",
+                "count",
+                "sum",
+                "last"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "srv.busy",
+          "as": "busy",
+          "records": [
+            {"type": "timeseries"},
+            {"type": "summary", "statistics": ["mean"]}
+          ]
+        },
+        {
+          "path": "q.length",
+          "as": "qlen2",
+          "records": [
+            {"type": "timeseries", "interval": 2.0},
+            {"type": "summary", "statistics": ["mean"]}
+          ]
+        },
+        {
+          "path": "snk.count",
+          "records": [
+            {"type": "final"}
+          ]
+        }
+      ]
+    }
+  ]
+}

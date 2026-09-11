@@ -1,0 +1,8 @@
+{"v":"0.1","time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"paramoverridecascade","duration":4,"seed":17}}
+{"v":"0.1","time":1,"type":"param.value","source":"v0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"value":3}}
+{"v":"0.1","time":2,"type":"param.value","source":"v0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"value":3}}
+{"v":"0.1","time":3,"type":"param.value","source":"v0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"value":3}}
+{"v":"0.1","time":3,"type":"param.changed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"name":"offset","value":5}}
+{"v":"0.1","time":3,"type":"param.changed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"name":"bonus","value":9}}
+{"v":"0.1","time":4,"type":"param.value","source":"v0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"value":6}}
+{"v":"0.1","time":4,"type":"sim.completed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"reason":"endTime"}}

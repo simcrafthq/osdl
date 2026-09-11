@@ -1,0 +1,2 @@
+{"v":"0.1","seq":1,"time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"errsend","duration":5,"seed":9}}
+{"v":"0.1","seq":2,"time":0,"type":"sim.error","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"code":"component.failure","message":"component \"e0\" (test.err) start at simulation time 0: e0.out has no route to carry an entity","source":"e0","operation":"start","time":0}}

@@ -1,0 +1,12 @@
+{"v":"0.1","seq":1,"time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"rngpair","duration":1,"seed":20260702}}
+{"v":"0.1","seq":2,"time":0,"type":"state.changed","source":"a","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"a.d1","value":6730390620841989}}
+{"v":"0.1","seq":3,"time":0,"type":"state.changed","source":"a","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"a.d2","value":5502401460802515}}
+{"v":"0.1","seq":4,"time":0,"type":"state.changed","source":"a","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"a.d3","value":6536504850202743}}
+{"v":"0.1","seq":5,"time":0,"type":"state.changed","source":"a","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"a.d4","value":5755371034615903}}
+{"v":"0.1","seq":6,"time":0,"type":"machine.draws","source":"a","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"draws":["13783839991484394830","11268918191723552664","13386761933215218490","11786999878893370076"]}}
+{"v":"0.1","seq":7,"time":0,"type":"state.changed","source":"b","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"b.d1","value":5138920709316164}}
+{"v":"0.1","seq":8,"time":0,"type":"state.changed","source":"b","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"b.d2","value":8624069363115274}}
+{"v":"0.1","seq":9,"time":0,"type":"state.changed","source":"b","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"b.d3","value":2841781739683611}}
+{"v":"0.1","seq":10,"time":0,"type":"state.changed","source":"b","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"b.d4","value":5664344241667848}}
+{"v":"0.1","seq":11,"time":0,"type":"machine.draws","source":"b","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"draws":["10524509612679504224","17662094055660081926","5819969002872036014","11600577006935752814"]}}
+{"v":"0.1","seq":12,"time":0,"type":"sim.completed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"reason":"quiescent"}}

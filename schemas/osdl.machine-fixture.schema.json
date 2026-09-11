@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://osdl.dev/schemas/0.1/osdl.machine-fixture.schema.json",
+  "title": "OSDL Machine Fixture",
+  "description": "A declarative input for a named machine behavior.",
+  "type": "object",
+  "required": ["format", "behavior"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {"type": "string"},
+    "format": {"const": "osdl-machine-fixture/0.1"},
+    "behavior": {"$ref": "#/$defs/identifier"},
+    "behaviorContract": {
+      "description": "A link to the published definition of the named behavior.",
+      "type": "string",
+      "minLength": 1
+    },
+    "arguments": {"type": "object"}
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    }
+  }
+}

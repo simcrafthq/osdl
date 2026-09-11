@@ -1,0 +1,13 @@
+{
+  "osdl": "0.1",
+  "model": {
+    "name": "unknown-component",
+    "components": [
+      {
+        "id": "missingType",
+        "type": "des.widget",
+        "params": {}
+      }
+    ]
+  }
+}

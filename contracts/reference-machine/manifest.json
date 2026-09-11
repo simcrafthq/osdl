@@ -1,0 +1,36 @@
+{
+  "$schema": "../../schemas/osdl.conformance.schema.json",
+  "osdl": "0.1",
+  "kind": "contract",
+  "id": "reference-machine",
+  "version": "0.1.0",
+  "extends": ["core@0.1.0", "des@0.1.0"],
+  "cases": [
+    {
+      "id": "roundtick.contract",
+      "input": {"format": "machine", "path": "conformance/cases/roundtick.machine.json"},
+      "expected": {"trace": "conformance/expected/roundtick.contract.trace.ndjson"}
+    },
+    {
+      "id": "rounderr.contract",
+      "input": {"format": "machine", "path": "conformance/cases/rounderr.machine.json"},
+      "expected": {"trace": "conformance/expected/rounderr.contract.trace.ndjson"}
+    }
+  ],
+  "assertions": [
+    {"case": "timers.machine", "trace": {"path": "conformance/expected/timers.machine.trace.ndjson"}},
+    {"case": "pipeline.machine", "trace": {"path": "conformance/expected/pipeline.machine.trace.ndjson"}},
+    {"case": "backpressure.machine", "trace": {"path": "conformance/expected/backpressure.machine.trace.ndjson"}},
+    {"case": "valuescope.machine", "trace": {"path": "conformance/expected/valuescope.machine.trace.ndjson"}},
+    {"case": "paramoverride.machine", "trace": {"path": "conformance/expected/paramoverride.machine.trace.ndjson"}},
+    {"case": "paramoverridecascade.machine", "trace": {"path": "conformance/expected/paramoverridecascade.machine.trace.ndjson"}},
+    {"case": "rngpair.machine", "trace": {"path": "conformance/expected/rngpair.machine.trace.ndjson"}},
+    {"case": "stopper.machine", "trace": {"path": "conformance/expected/stopper.machine.trace.ndjson"}},
+    {"case": "threshold.machine", "trace": {"path": "conformance/expected/threshold.machine.trace.ndjson"}},
+    {"case": "exprerr.machine", "trace": {"path": "conformance/expected/exprerr.machine.trace.ndjson"}},
+    {"case": "errsend.machine", "trace": {"path": "conformance/expected/errsend.machine.trace.ndjson"}},
+    {"case": "componenterr.machine", "trace": {"path": "conformance/expected/componenterr.machine.trace.ndjson"}},
+    {"case": "pipeline.osdl", "trace": {"path": "conformance/expected/pipeline.osdl.trace.ndjson"}},
+    {"case": "recorders.osdl", "trace": {"path": "conformance/expected/recorders.osdl.trace.ndjson"}}
+  ]
+}

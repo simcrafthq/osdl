@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <mask id="bolt-cut">
+      <rect width="200" height="200" fill="#fff"/>
+      <path d="M 132 12 L 76 82 L 122 108 L 66 188" fill="none" stroke="#000" stroke-width="16" stroke-linejoin="miter"/>
+    </mask>
+  </defs>
+  <polygon points="100,25 165,62.5 165,137.5 100,175 35,137.5 35,62.5" fill="#ffffff" mask="url(#bolt-cut)"/>
+</svg>

@@ -1,0 +1,81 @@
+{
+  "$schema": "../../schemas/osdl.conformance.schema.json",
+  "osdl": "0.1",
+  "kind": "core",
+  "id": "core",
+  "version": "0.1.0",
+  "cases": [
+    {
+      "id": "timers.machine",
+      "description": "Checks timer ordering for equal and different event times.",
+      "input": {"format": "machine", "path": "cases/timers.machine.json"},
+      "expected": {"events": "expected/timers.machine.events.ndjson"}
+    },
+    {
+      "id": "pipeline.machine",
+      "description": "Checks accepted entity delivery through a source and sink.",
+      "input": {"format": "machine", "path": "cases/pipeline.machine.json"},
+      "expected": {"events": "expected/pipeline.machine.events.ndjson"}
+    },
+    {
+      "id": "backpressure.machine",
+      "description": "Checks escrow blocking, readiness, and kernel redelivery.",
+      "input": {"format": "machine", "path": "cases/backpressure.machine.json"},
+      "expected": {"events": "expected/backpressure.machine.events.ndjson"}
+    },
+    {
+      "id": "valuescope.machine",
+      "description": "Checks parameter, state, local expression, and sampling scopes.",
+      "input": {"format": "machine", "path": "cases/valuescope.machine.json"},
+      "expected": {"events": "expected/valuescope.machine.events.ndjson"}
+    },
+    {
+      "id": "paramoverride.machine",
+      "description": "Checks one run-time parameter override at a dispatch boundary.",
+      "input": {"format": "machine", "path": "cases/paramoverride.machine.json"},
+      "expected": {"events": "expected/paramoverride.machine.events.ndjson"}
+    },
+    {
+      "id": "paramoverridecascade.machine",
+      "description": "Checks cascading parameter overrides at one dispatch boundary.",
+      "input": {"format": "machine", "path": "cases/paramoverridecascade.machine.json"},
+      "expected": {"events": "expected/paramoverridecascade.machine.events.ndjson"}
+    },
+    {
+      "id": "rngpair.machine",
+      "description": "Checks deterministic random streams for two components.",
+      "input": {"format": "machine", "path": "cases/rngpair.machine.json"},
+      "expected": {"events": "expected/rngpair.machine.events.ndjson"}
+    },
+    {
+      "id": "stopper.machine",
+      "description": "Checks a component-requested stop.",
+      "input": {"format": "machine", "path": "cases/stopper.machine.json"},
+      "expected": {"events": "expected/stopper.machine.events.ndjson"}
+    },
+    {
+      "id": "threshold.machine",
+      "description": "Checks expression-based stopping after a state change.",
+      "input": {"format": "machine", "path": "cases/threshold.machine.json"},
+      "expected": {"events": "expected/threshold.machine.events.ndjson"}
+    },
+    {
+      "id": "exprerr.machine",
+      "description": "Checks expression failure during stop-condition evaluation.",
+      "input": {"format": "machine", "path": "cases/exprerr.machine.json"},
+      "expected": {"events": "expected/exprerr.machine.events.ndjson"}
+    },
+    {
+      "id": "errsend.machine",
+      "description": "Checks the terminal error for a send without a route.",
+      "input": {"format": "machine", "path": "cases/errsend.machine.json"},
+      "expected": {"events": "expected/errsend.machine.events.ndjson"}
+    },
+    {
+      "id": "componenterr.machine",
+      "description": "Checks a component-raised terminal error.",
+      "input": {"format": "machine", "path": "cases/componenterr.machine.json"},
+      "expected": {"events": "expected/componenterr.machine.events.ndjson"}
+    }
+  ]
+}

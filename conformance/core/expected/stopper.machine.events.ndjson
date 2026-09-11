@@ -1,0 +1,2 @@
+{"v":"0.1","time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"stopper","duration":10,"seed":1}}
+{"v":"0.1","time":3,"type":"sim.completed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"reason":"requested"}}

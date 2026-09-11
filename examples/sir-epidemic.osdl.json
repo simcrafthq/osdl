@@ -1,0 +1,225 @@
+{
+  "$schema": "https://osdl.dev/schemas/0.1/osdl.schema.json",
+  "osdl": "0.1",
+  "model": {
+    "name": "sir-epidemic",
+    "label": "SIR Epidemic",
+    "description": "Classic susceptible-infected-recovered compartment model as pure system dynamics: two flows move population between three stocks at expression-defined rates.",
+    "time": {
+      "unit": "days",
+      "integration": {
+        "method": "euler",
+        "dt": 0.25
+      }
+    },
+    "parameters": [
+      {
+        "name": "population",
+        "description": "Total population.",
+        "type": "integer",
+        "default": 1000
+      },
+      {
+        "name": "initialInfected",
+        "description": "Infected individuals at t0.",
+        "type": "integer",
+        "default": 10
+      },
+      {
+        "name": "beta",
+        "description": "Effective contact rate: contacts per person per day times transmission probability.",
+        "default": 0.3,
+        "unit": "1/day"
+      },
+      {
+        "name": "gamma",
+        "description": "Recovery rate; mean infectious period is 1/gamma days.",
+        "default": 0.1,
+        "unit": "1/day"
+      }
+    ],
+    "components": [
+      {
+        "id": "susceptible",
+        "type": "sd.stock",
+        "params": {
+          "initial": {
+            "expr": "population - initialInfected"
+          },
+          "nonNegative": true
+        }
+      },
+      {
+        "id": "infected",
+        "type": "sd.stock",
+        "params": {
+          "initial": {
+            "param": "initialInfected"
+          },
+          "nonNegative": true
+        }
+      },
+      {
+        "id": "recovered",
+        "type": "sd.stock",
+        "params": {
+          "initial": 0,
+          "nonNegative": true
+        }
+      },
+      {
+        "id": "infection",
+        "type": "sd.flow",
+        "params": {
+          "rate": {
+            "expr": "beta * susceptible.value * infected.value / population"
+          }
+        }
+      },
+      {
+        "id": "recovery",
+        "type": "sd.flow",
+        "params": {
+          "rate": {
+            "expr": "gamma * infected.value"
+          }
+        }
+      }
+    ],
+    "connections": [
+      {
+        "from": "susceptible.out",
+        "to": "infection.in"
+      },
+      {
+        "from": "infection.out",
+        "to": "infected.in"
+      },
+      {
+        "from": "infected.out",
+        "to": "recovery.in"
+      },
+      {
+        "from": "recovery.out",
+        "to": "recovered.in"
+      }
+    ]
+  },
+  "experiments": [
+    {
+      "name": "baseline",
+      "duration": 160,
+      "outputs": [
+        {
+          "path": "susceptible.value",
+          "records": [
+            {
+              "type": "timeseries",
+              "interval": 1
+            },
+            {
+              "type": "summary"
+            }
+          ]
+        },
+        {
+          "path": "infected.value",
+          "records": [
+            {
+              "type": "timeseries",
+              "interval": 1
+            },
+            {
+              "type": "summary"
+            }
+          ]
+        },
+        {
+          "path": "recovered.value",
+          "records": [
+            {
+              "type": "timeseries",
+              "interval": 1
+            },
+            {
+              "type": "summary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "beta-sweep",
+      "description": "How does the epidemic peak respond to the contact rate?",
+      "duration": 160,
+      "sweep": [
+        {
+          "parameter": "beta",
+          "values": [
+            0.2,
+            0.3,
+            0.4,
+            0.5
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "path": "infected.value",
+          "as": "peakInfected",
+          "records": [
+            {
+              "type": "summary",
+              "statistics": [
+                "max"
+              ]
+            }
+          ]
+        },
+        {
+          "path": "recovered.value",
+          "as": "totalRecovered",
+          "records": [
+            {
+              "type": "final"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "main",
+      "label": "Stock & flow diagram",
+      "type": "canvas",
+      "elements": [
+        {
+          "ref": "susceptible",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "ref": "infection",
+          "x": 200,
+          "y": 0
+        },
+        {
+          "ref": "infected",
+          "x": 400,
+          "y": 0
+        },
+        {
+          "ref": "recovery",
+          "x": 600,
+          "y": 0
+        },
+        {
+          "ref": "recovered",
+          "x": 800,
+          "y": 0
+        }
+      ]
+    }
+  ]
+}

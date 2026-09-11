@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://osdl.dev/schemas/0.1/osdl.library.schema.json",
+  "title": "OSDL Component Library Definition",
+  "description": "Describes a component library: the set of component types a plugin contributes, including their ports, parameter schemas, observable state, and emitted events. Tools derive palettes, parameter forms, validation, and documentation from this document; it is the contract between an engine plugin and every OSDL-aware tool.",
+  "type": "object",
+  "required": ["osdl", "library"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional URI of the OSDL library JSON Schema, for editor tooling."
+    },
+    "osdl": {
+      "const": "0.1",
+      "description": "Version of the OSDL specification this library definition conforms to."
+    },
+    "library": {
+      "type": "object",
+      "required": ["namespace", "name", "version", "description", "components"],
+      "additionalProperties": false,
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "The type-name prefix this library owns, e.g. `des` for `des.queue`. Namespaces are globally unique by convention; `core`, `des`, `abm`, and `sd` are reserved for the standard libraries."
+        },
+        "name": { "type": "string" },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$",
+          "description": "Semantic version of the library definition."
+        },
+        "description": { "type": "string" },
+        "homepage": { "type": "string" },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/componentType" }
+        },
+        "metadata": { "type": "object" }
+      }
+    }
+  },
+  "$defs": {
+    "componentType": {
+      "type": "object",
+      "required": ["name", "description", "ports"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-zA-Z0-9_]*$",
+          "description": "Local type name. The full type is `<namespace>.<name>`."
+        },
+        "label": { "type": "string" },
+        "description": {
+          "type": "string",
+          "description": "Required. The semantic contract of this component type, written for humans and language models alike."
+        },
+        "category": {
+          "type": "string",
+          "description": "Palette grouping hint for visual editors."
+        },
+        "ports": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/portSpec" },
+          "description": "The ports every instance of this type exposes. May be empty for components referenced only via expressions (e.g. `sd.auxiliary`)."
+        },
+        "params": {
+          "type": "object",
+          "description": "A JSON Schema (draft 2020-12) that validates the `params` object of instances of this type (phase-two validation). MAY reference value definitions from the core schema, e.g. `https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/numericValue`."
+        },
+        "state": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stateVar" },
+          "description": "Observable state variables, addressable as `<componentId>.<stateId>` in outputs and expressions."
+        },
+        "emits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/eventSpec" },
+          "description": "Event types instances of this component emit onto the simulation event stream."
+        },
+        "metadata": { "type": "object" }
+      }
+    },
+    "portSpec": {
+      "type": "object",
+      "required": ["id", "direction"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["in", "out"]
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["entity", "message", "value"],
+          "default": "entity",
+          "description": "What the port carries: entities under the custody protocol, immutable message payloads, or typed scalar values. Connections must join ports of the same kind."
+        },
+        "description": { "type": "string" },
+        "multiple": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether more than one connection may attach to this port."
+        }
+      }
+    },
+    "stateVar": {
+      "type": "object",
+      "required": ["id", "type", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["number", "integer", "boolean", "string"]
+        },
+        "description": { "type": "string" },
+        "unit": { "type": "string" }
+      }
+    },
+    "eventSpec": {
+      "type": "object",
+      "required": ["event", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "event": {
+          "type": "string",
+          "pattern": "^[a-z][a-zA-Z0-9]*(\\.[a-z][a-zA-Z0-9]*)+$"
+        },
+        "description": { "type": "string" },
+        "payload": {
+          "type": "object",
+          "description": "A JSON Schema (draft 2020-12) describing the event payload."
+        }
+      }
+    }
+  }
+}

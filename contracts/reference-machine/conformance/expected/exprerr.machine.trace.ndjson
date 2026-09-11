@@ -1,0 +1,4 @@
+{"v":"0.1","seq":1,"time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"exprerr","duration":5,"seed":13}}
+{"v":"0.1","seq":2,"time":0,"type":"state.changed","source":"c0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"path":"c0.zero","value":0}}
+{"v":"0.1","seq":3,"time":1,"type":"sim.progress","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"progress":0.2}}
+{"v":"0.1","seq":4,"time":1,"type":"sim.error","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"code":"expression.error","message":"division by zero in \"1 / c0.zero\"","time":1}}

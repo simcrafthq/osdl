@@ -1,0 +1,842 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://osdl.dev/schemas/0.1/osdl.schema.json",
+  "title": "OSDL Model Document",
+  "description": "Open Simulation Definition Language (OSDL) v0.1: a vendor-neutral, JSON-native format for discrete-event, agent-based, system-dynamics, and hybrid simulation models. This schema validates document structure (phase one). Component `params` objects are additionally validated against the params schema published in the component type's library definition (phase two). See SPEC.md for the semantics.",
+  "type": "object",
+  "required": ["osdl", "model"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optional URI of the OSDL JSON Schema, for editor tooling."
+    },
+    "osdl": {
+      "const": "0.1",
+      "description": "Version of the OSDL specification this document conforms to."
+    },
+    "model": { "$ref": "#/$defs/model" },
+    "experiments": {
+      "type": "array",
+      "description": "Run configurations: duration, replications, seeds, parameter overrides, sweeps, and recorded outputs.",
+      "items": { "$ref": "#/$defs/experiment" }
+    },
+    "views": {
+      "type": "array",
+      "description": "Presentation-only layout (canvas positions, edge routing). Views must not affect simulation semantics.",
+      "items": { "$ref": "#/$defs/view" }
+    },
+    "metadata": { "$ref": "#/$defs/metadata" }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$",
+      "description": "A name: starts with a letter or underscore, then letters, digits, underscores, or hyphens."
+    },
+    "typeName": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-zA-Z0-9_]*$",
+      "description": "A namespaced component type, `<namespace>.<name>`, e.g. `des.queue`. The namespace identifies the component library that defines the type. `core.composite` is reserved for a future additive version."
+    },
+    "portRef": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_-]*\\.[A-Za-z_][A-Za-z0-9_-]*$",
+      "description": "A connection endpoint, `<componentId>.<portId>`, referring to a sibling component in the same model scope."
+    },
+    "statePath": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_-]*(\\.[A-Za-z_][A-Za-z0-9_-]*)+$",
+      "description": "A dotted path to an observable state variable, e.g. `teller.utilization` or `patients.inState.sick`."
+    },
+    "eventType": {
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9]*(\\.[a-z][a-zA-Z0-9]*)+$",
+      "description": "A dotted event type name, e.g. `entity.moved`."
+    },
+    "expressionString": {
+      "type": "string",
+      "minLength": 1,
+      "description": "An expression in the OSDL expression language (SPEC.md §7.3). References resolve to parameters, component state paths, and (in agent scope) agent attributes."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Free-form extension data. Keys should be namespaced, for example `com.example.tool`. Metadata must not affect simulation semantics."
+    },
+    "model": {
+      "type": "object",
+      "required": ["name", "components"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "label": { "type": "string", "description": "Human-readable display name." },
+        "description": { "type": "string" },
+        "time": { "$ref": "#/$defs/timeConfig" },
+        "parameters": {
+          "type": "array",
+          "description": "Model-level inputs, overridable per experiment and referenceable from any value position.",
+          "items": { "$ref": "#/$defs/parameterDef" }
+        },
+        "components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/component" }
+        },
+        "connections": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/connection" }
+        },
+        "metadata": { "$ref": "#/$defs/metadata" }
+      }
+    },
+    "timeConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unit": {
+          "type": "string",
+          "enum": ["ticks", "milliseconds", "seconds", "minutes", "hours", "days", "weeks", "years"],
+          "default": "ticks",
+          "description": "The unit of simulation time. All durations, delays, and rates in the model are expressed in this unit."
+        },
+        "start": {
+          "oneOf": [
+            { "type": "number", "description": "Simulation start time t0." },
+            { "type": "string", "description": "ISO 8601 date-time mapping t0 onto calendar time." }
+          ]
+        },
+        "integration": { "$ref": "#/$defs/integrationConfig" }
+      }
+    },
+    "integrationConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Numerical integration settings for continuous components. The step size defines observable integration boundaries on the shared simulation clock. An implementation can use any internal integration design that preserves boundary behavior.",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": ["euler", "rk4"],
+          "default": "euler"
+        },
+        "dt": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1.0,
+          "description": "Integration step size, in model time units."
+        }
+      }
+    },
+    "parameterDef": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["number", "integer", "boolean", "string"],
+          "default": "number"
+        },
+        "default": {
+          "oneOf": [
+            { "type": "number" },
+            { "type": "boolean" },
+            { "type": "string" }
+          ]
+        },
+        "unit": { "type": "string", "description": "Unit of measure, e.g. `patients/hour`. Informational in v0.1." },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "choices": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "oneOf": [{ "type": "number" }, { "type": "string" }] },
+          "description": "If present, the parameter value must be one of these."
+        },
+        "metadata": { "$ref": "#/$defs/metadata" }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": ["id", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier",
+          "description": "Unique within the enclosing model scope."
+        },
+        "type": { "$ref": "#/$defs/typeName" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "params": {
+          "type": "object",
+          "description": "Configuration for this component instance. Validated (phase two) against the params schema in the component type's library definition."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "metadata": { "$ref": "#/$defs/metadata" }
+      },
+      "not": {
+        "properties": { "type": { "const": "core.composite" } },
+        "required": ["type"]
+      }
+    },
+    "connection": {
+      "type": "object",
+      "required": ["from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier",
+          "description": "Optional, but required if the connection is referenced from a view route."
+        },
+        "from": { "$ref": "#/$defs/portRef" },
+        "to": { "$ref": "#/$defs/portRef" },
+        "label": { "type": "string" },
+        "params": {
+          "type": "object",
+          "description": "Library-defined link configuration (e.g. routing weight). Interpreted by the component types at the endpoints."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "metadata": { "$ref": "#/$defs/metadata" }
+      }
+    },
+    "paramRef": {
+      "type": "object",
+      "required": ["param"],
+      "additionalProperties": false,
+      "properties": {
+        "param": {
+          "$ref": "#/$defs/identifier",
+          "description": "The name of a model parameter."
+        }
+      }
+    },
+    "expression": {
+      "type": "object",
+      "required": ["expr"],
+      "additionalProperties": false,
+      "properties": {
+        "expr": { "$ref": "#/$defs/expressionString" }
+      }
+    },
+    "scalarValue": {
+      "description": "A deterministic numeric value: a literal, a parameter reference, or an expression.",
+      "oneOf": [
+        { "type": "number" },
+        { "$ref": "#/$defs/paramRef" },
+        { "$ref": "#/$defs/expression" }
+      ]
+    },
+    "numericValue": {
+      "description": "A possibly stochastic numeric value: a literal, a parameter reference, an expression, or a probability distribution (re-sampled at each use).",
+      "oneOf": [
+        { "type": "number" },
+        { "$ref": "#/$defs/paramRef" },
+        { "$ref": "#/$defs/expression" },
+        { "$ref": "#/$defs/distribution" }
+      ]
+    },
+    "value": {
+      "description": "A general value: literal, parameter reference, expression, or distribution. Plain strings are literals. Expressions must use the `{\"expr\": ...}` form.",
+      "oneOf": [
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "string" },
+        { "$ref": "#/$defs/paramRef" },
+        { "$ref": "#/$defs/expression" },
+        { "$ref": "#/$defs/distribution" }
+      ]
+    },
+    "distribution": {
+      "description": "A probability distribution. Numeric arguments may themselves be parameter references or expressions.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["dist", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "constant" },
+            "value": { "$ref": "#/$defs/scalarValue" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "min", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "uniform" },
+            "min": { "$ref": "#/$defs/scalarValue" },
+            "max": { "$ref": "#/$defs/scalarValue" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "rate"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "exponential" },
+            "rate": {
+              "$ref": "#/$defs/scalarValue",
+              "description": "Events per model time unit; mean = 1/rate."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "mean", "std"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "normal" },
+            "mean": { "$ref": "#/$defs/scalarValue" },
+            "std": { "$ref": "#/$defs/scalarValue" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "mu", "sigma"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "lognormal" },
+            "mu": { "$ref": "#/$defs/scalarValue", "description": "Mean of the underlying normal (log space)." },
+            "sigma": { "$ref": "#/$defs/scalarValue", "description": "Std of the underlying normal (log space)." }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "min", "mode", "max"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "triangular" },
+            "min": { "$ref": "#/$defs/scalarValue" },
+            "mode": { "$ref": "#/$defs/scalarValue" },
+            "max": { "$ref": "#/$defs/scalarValue" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "shape", "scale"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "weibull" },
+            "shape": { "$ref": "#/$defs/scalarValue" },
+            "scale": { "$ref": "#/$defs/scalarValue" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "shape", "scale"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "gamma" },
+            "shape": { "$ref": "#/$defs/scalarValue" },
+            "scale": { "$ref": "#/$defs/scalarValue" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "alpha", "beta"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "beta" },
+            "alpha": { "$ref": "#/$defs/scalarValue" },
+            "beta": { "$ref": "#/$defs/scalarValue" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "rate"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "poisson" },
+            "rate": { "$ref": "#/$defs/scalarValue", "description": "Mean count per draw." }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "n", "p"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "binomial" },
+            "n": { "$ref": "#/$defs/scalarValue", "description": "Number of trials (integer)." },
+            "p": { "$ref": "#/$defs/scalarValue" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "p"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "bernoulli" },
+            "p": { "$ref": "#/$defs/scalarValue" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "p"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "geometric" },
+            "p": { "$ref": "#/$defs/scalarValue" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "values"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "discrete" },
+            "values": {
+              "type": "array",
+              "minItems": 1,
+              "description": "Categorical distribution: each entry is drawn with probability weight/sum(weights).",
+              "items": {
+                "type": "object",
+                "required": ["value"],
+                "additionalProperties": false,
+                "properties": {
+                  "value": {
+                    "oneOf": [
+                      { "type": "number" },
+                      { "type": "string" },
+                      { "type": "boolean" }
+                    ]
+                  },
+                  "weight": {
+                    "$ref": "#/$defs/scalarValue",
+                    "default": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["dist", "samples"],
+          "additionalProperties": false,
+          "properties": {
+            "dist": { "const": "empirical" },
+            "samples": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "number" },
+              "description": "Observed data; draws resample from these values."
+            }
+          }
+        }
+      ]
+    },
+    "statechart": {
+      "type": "object",
+      "required": ["initial", "states"],
+      "additionalProperties": false,
+      "description": "A finite-state behaviour definition. Used by agent definitions and stateful components across paradigms.",
+      "properties": {
+        "initial": {
+          "$ref": "#/$defs/identifier",
+          "description": "The id of the initial state."
+        },
+        "states": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/state" }
+        },
+        "transitions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/transition" }
+        }
+      }
+    },
+    "state": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "onEnter": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/action" }
+        },
+        "onExit": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/action" }
+        }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "required": ["from", "to", "trigger"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "$ref": "#/$defs/identifier" },
+        "to": { "$ref": "#/$defs/identifier" },
+        "trigger": { "$ref": "#/$defs/trigger" },
+        "guard": {
+          "$ref": "#/$defs/expressionString",
+          "description": "Boolean expression; the transition fires only if it evaluates true."
+        },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/action" }
+        },
+        "label": { "type": "string" }
+      }
+    },
+    "trigger": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "delay"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "timeout" },
+            "delay": {
+              "$ref": "#/$defs/numericValue",
+              "description": "Fires after this much time in the source state."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "rate"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "rate" },
+            "rate": {
+              "$ref": "#/$defs/numericValue",
+              "description": "Exponential hazard: fires after Exp(rate)-distributed time; mean = 1/rate."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "expr"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "condition" },
+            "expr": {
+              "$ref": "#/$defs/expressionString",
+              "description": "Fires when the expression becomes true."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "topic"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "message" },
+            "topic": {
+              "type": "string",
+              "description": "Fires when a message with this topic is received."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "port"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "arrive" },
+            "port": {
+              "$ref": "#/$defs/identifier",
+              "description": "Fires when this agent, having previously departed, arrives back at the named port of its population."
+            }
+          }
+        }
+      ]
+    },
+    "action": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "target", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "set" },
+            "target": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_-]*(\\.[A-Za-z_][A-Za-z0-9_-]*)*$",
+              "description": "An agent attribute name (in agent scope) or a writable component state path."
+            },
+            "value": { "$ref": "#/$defs/value" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "topic"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "send" },
+            "topic": { "type": "string" },
+            "to": {
+              "type": "string",
+              "enum": ["self", "connected", "random", "all"],
+              "default": "connected",
+              "description": "Recipients within the population: the agent itself, its network neighbours, one uniformly random agent, or every agent."
+            },
+            "payload": { "type": "object" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "event"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "emit" },
+            "event": {
+              "$ref": "#/$defs/eventType",
+              "description": "Emits a custom event onto the simulation event stream."
+            },
+            "payload": { "type": "object" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "port"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "depart" },
+            "port": {
+              "$ref": "#/$defs/identifier",
+              "description": "The agent leaves its population as an entity through this out port (e.g. into a discrete-event process)."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "message"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "log" },
+            "message": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "experiment": {
+      "type": "object",
+      "required": ["name", "duration"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "duration": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Run length in model time units."
+        },
+        "warmup": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Initial period excluded from recorded outputs."
+        },
+        "replications": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Root random seed. Replication r uses a stream deterministically derived from (seed, r). Engines must produce identical results for identical (model, experiment, seed, replication)."
+        },
+        "parameters": {
+          "type": "object",
+          "description": "Fixed overrides of model parameter defaults, keyed by parameter name.",
+          "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$" },
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "number" },
+              { "type": "boolean" },
+              { "type": "string" }
+            ]
+          }
+        },
+        "sweep": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Parameter sweep. The experiment runs once per element of the cross product of all entries' value lists (times `replications`).",
+          "items": {
+            "type": "object",
+            "required": ["parameter", "values"],
+            "additionalProperties": false,
+            "properties": {
+              "parameter": { "$ref": "#/$defs/identifier" },
+              "values": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "oneOf": [
+                    { "type": "number" },
+                    { "type": "boolean" },
+                    { "type": "string" }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/output" }
+        },
+        "stopWhen": {
+          "$ref": "#/$defs/expressionString",
+          "description": "Optional early-stop condition; the run ends when it evaluates true."
+        },
+        "metadata": { "$ref": "#/$defs/metadata" }
+      }
+    },
+    "output": {
+      "description": "A recorded observable with one or more independent recorders. The recorder type must support the observable's state type.",
+      "type": "object",
+      "required": ["path", "records"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "$ref": "#/$defs/statePath" },
+        "as": {
+          "$ref": "#/$defs/identifier",
+          "description": "Alias used in results and `metric.updated` events."
+        },
+        "records": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/recorder" },
+          "allOf": [
+            {
+              "contains": { "type": "object", "properties": { "type": { "const": "timeseries" } }, "required": ["type"] },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "type": "object", "properties": { "type": { "const": "summary" } }, "required": ["type"] },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "type": "object", "properties": { "type": { "const": "final" } }, "required": ["type"] },
+              "minContains": 0,
+              "maxContains": 1
+            }
+          ]
+        }
+      }
+    },
+    "recorder": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "Records number or integer values at an interval or on change.",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "timeseries" },
+            "interval": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Sampling interval. If omitted, the value is recorded on every change."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "description": "Computes numeric statistics for a number or integer observable.",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "summary" },
+            "statistics": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": ["mean", "std", "min", "max", "median", "p5", "p25", "p75", "p90", "p95", "p99", "count", "sum", "last"]
+              },
+              "description": "Summary statistics to compute. The default is [\"mean\"]."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "description": "Records the final number, integer, boolean, or string value.",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "final" }
+          }
+        }
+      ]
+    },
+    "view": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "label": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["canvas"],
+          "default": "canvas"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ref", "x", "y"],
+            "additionalProperties": false,
+            "properties": {
+              "ref": {
+                "$ref": "#/$defs/identifier",
+                "description": "The id of the component this element positions."
+              },
+              "x": { "type": "number" },
+              "y": { "type": "number" },
+              "width": { "type": "number", "exclusiveMinimum": 0 },
+              "height": { "type": "number", "exclusiveMinimum": 0 }
+            }
+          }
+        },
+        "routes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ref"],
+            "additionalProperties": false,
+            "properties": {
+              "ref": {
+                "$ref": "#/$defs/identifier",
+                "description": "The id of the connection this route lays out."
+              },
+              "vertices": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/point" }
+              }
+            }
+          }
+        },
+        "metadata": { "$ref": "#/$defs/metadata" }
+      }
+    },
+    "point": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    }
+  }
+}

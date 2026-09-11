@@ -1,0 +1,5 @@
+{"v":"0.1","time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"timers","duration":10,"seed":42}}
+{"v":"0.1","time":1,"type":"fixture.timerFired","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"timer":1,"count":1}}
+{"v":"0.1","time":1,"type":"fixture.timerFired","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"timer":2,"count":2}}
+{"v":"0.1","time":2.5,"type":"fixture.timerFired","source":"t0","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"timer":3,"count":3}}
+{"v":"0.1","time":2.5,"type":"sim.completed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"reason":"quiescent"}}

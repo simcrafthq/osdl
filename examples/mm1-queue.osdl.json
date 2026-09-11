@@ -1,0 +1,111 @@
+{
+  "$schema": "https://osdl.dev/schemas/0.1/osdl.schema.json",
+  "osdl": "0.1",
+  "model": {
+    "name": "mm1-queue",
+    "label": "M/M/1 Queue",
+    "description": "The classic single-server queue: Poisson arrivals (rate 0.9), exponential service (rate 1.0), one teller, FIFO discipline. Expected steady-state utilization 0.9.",
+    "components": [
+      {
+        "id": "arrivals",
+        "type": "des.source",
+        "params": {
+          "interarrival": {
+            "dist": "exponential",
+            "rate": 0.9
+          }
+        }
+      },
+      {
+        "id": "waiting",
+        "type": "des.queue",
+        "params": {
+          "discipline": "fifo"
+        }
+      },
+      {
+        "id": "teller",
+        "type": "des.server",
+        "params": {
+          "serviceTime": {
+            "dist": "exponential",
+            "rate": 1.0
+          }
+        }
+      },
+      {
+        "id": "done",
+        "type": "des.sink"
+      }
+    ],
+    "connections": [
+      {
+        "from": "arrivals.out",
+        "to": "waiting.in"
+      },
+      {
+        "from": "waiting.out",
+        "to": "teller.in"
+      },
+      {
+        "from": "teller.out",
+        "to": "done.in"
+      }
+    ]
+  },
+  "experiments": [
+    {
+      "name": "baseline",
+      "duration": 10000,
+      "replications": 30,
+      "seed": 7,
+      "outputs": [
+        {
+          "path": "waiting.length",
+          "records": [
+            {
+              "type": "summary"
+            }
+          ]
+        },
+        {
+          "path": "teller.utilization",
+          "records": [
+            {
+              "type": "summary"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "main",
+      "label": "Process flow",
+      "type": "canvas",
+      "elements": [
+        {
+          "ref": "arrivals",
+          "x": 0,
+          "y": 0
+        },
+        {
+          "ref": "waiting",
+          "x": 220,
+          "y": 0
+        },
+        {
+          "ref": "teller",
+          "x": 440,
+          "y": 0
+        },
+        {
+          "ref": "done",
+          "x": 660,
+          "y": 0
+        }
+      ]
+    }
+  ]
+}

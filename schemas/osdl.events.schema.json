@@ -1,0 +1,339 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://osdl.dev/schemas/0.1/osdl.events.schema.json",
+  "title": "OSDL Simulation Event",
+  "description": "Wire format for one event on the typed simulation event stream. A stream is a sequence of these objects (newline-delimited JSON over a socket, or structured messages in-process). Transports vary; the envelope does not. Core event types are validated below; libraries and models may emit additional namespaced types.",
+  "type": "object",
+  "required": ["v", "seq", "time", "type", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "v": {
+      "const": "0.1",
+      "description": "Event stream format version."
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonically increasing sequence number within a run. Total order of emission; ties in simulation time are broken by seq."
+    },
+    "time": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Simulation time of the event, in model time units."
+    },
+    "wallTime": {
+      "type": "integer",
+      "description": "Optional wall-clock timestamp, milliseconds since the Unix epoch."
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9]*(\\.[a-z][a-zA-Z0-9]*)+$"
+    },
+    "source": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_-]*(\\.[A-Za-z_][A-Za-z0-9_-]*)*$",
+      "description": "The emitting component id, or `kernel` for engine lifecycle events."
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "experiment": { "type": "string" },
+        "replication": { "type": "integer", "minimum": 1 },
+        "scenario": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Index into the experiment's sweep cross product, if sweeping."
+        }
+      }
+    },
+    "payload": { "type": "object" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "sim.started" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/simStarted" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "sim.progress" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/simProgress" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "sim.completed" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/simCompleted" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "sim.error" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/simError" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "entity.created" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/entityCreated" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "entity.moved" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/entityMoved" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "entity.disposed" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/entityDisposed" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "state.changed" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/stateChanged" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "param.changed" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/paramChanged" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "metric.updated" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/metricUpdated" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "agent.transitioned" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/agentTransitioned" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "message.sent" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/messageSent" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "sim.aborted" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/simAborted" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "value.changed" } }, "required": ["type"] },
+      "then": {
+        "required": ["payload"],
+        "properties": { "payload": { "$ref": "#/$defs/valueChanged" } }
+      }
+    }
+  ],
+  "$defs": {
+    "simStarted": {
+      "type": "object",
+      "required": ["model"],
+      "additionalProperties": false,
+      "properties": {
+        "model": { "type": "string" },
+        "duration": { "type": "number" },
+        "seed": { "type": "integer" }
+      }
+    },
+    "simProgress": {
+      "type": "object",
+      "required": ["progress"],
+      "additionalProperties": false,
+      "properties": {
+        "progress": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of the configured duration elapsed."
+        }
+      }
+    },
+    "simCompleted": {
+      "type": "object",
+      "required": ["reason"],
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": ["endTime", "condition", "requested", "quiescent"],
+          "description": "Why the run completed normally."
+        }
+      }
+    },
+    "simError": {
+      "type": "object",
+      "required": ["code", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": ["component.failure", "kernel.runtime", "expression.error"],
+          "description": "Stable diagnostic code."
+        },
+        "message": { "type": "string" },
+        "source": { "type": "string", "description": "Component id path at fault, if known." },
+        "operation": {
+          "type": "string",
+          "enum": ["start", "handle", "receive", "finish"],
+          "description": "The component runtime operation, if known."
+        },
+        "time": { "type": "number", "description": "Simulation time of the failure." }
+      }
+    },
+    "simAborted": {
+      "type": "object",
+      "required": ["reason"],
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": ["budgetExceeded", "cancelled"],
+          "description": "Host or implementation-policy abort reason."
+        }
+      }
+    },
+    "entityCreated": {
+      "type": "object",
+      "required": ["entityId", "at"],
+      "additionalProperties": false,
+      "properties": {
+        "entityId": { "type": "string" },
+        "entityType": { "type": "string" },
+        "at": { "type": "string", "description": "Component id path where the entity was created." }
+      }
+    },
+    "entityMoved": {
+      "type": "object",
+      "required": ["entityId", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "entityId": { "type": "string" },
+        "from": { "type": "string", "description": "Component id path the entity left." },
+        "to": { "type": "string", "description": "Component id path the entity entered." },
+        "position": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": { "type": "number" },
+          "description": "Optional spatial coordinates for renderers, [x, y] or [x, y, z]."
+        }
+      }
+    },
+    "entityDisposed": {
+      "type": "object",
+      "required": ["entityId", "at"],
+      "additionalProperties": false,
+      "properties": {
+        "entityId": { "type": "string" },
+        "at": { "type": "string" }
+      }
+    },
+    "stateChanged": {
+      "type": "object",
+      "required": ["path", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string", "description": "State path, e.g. `waiting.length`." },
+        "value": { "$ref": "#/$defs/stateValue" }
+      }
+    },
+    "paramChanged": {
+      "type": "object",
+      "required": ["name", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$" },
+        "value": { "$ref": "#/$defs/stateValue" }
+      }
+    },
+    "metricUpdated": {
+      "type": "object",
+      "required": ["name", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "description": "Output path or alias as configured in the experiment." },
+        "value": { "$ref": "#/$defs/recordedValue" }
+      }
+    },
+    "agentTransitioned": {
+      "type": "object",
+      "required": ["agentId", "from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "agentId": { "type": "string" },
+        "from": { "type": "string" },
+        "to": { "type": "string" }
+      }
+    },
+    "messageSent": {
+      "oneOf": [
+        {
+          "type": "object",
+          "description": "ABM agent-to-agent message.",
+          "required": ["topic"],
+          "additionalProperties": false,
+          "properties": {
+            "topic": { "type": "string" },
+            "fromAgent": { "type": "string" },
+            "toAgent": { "type": "string" },
+            "payload": { "type": "object" }
+          }
+        },
+        {
+          "type": "object",
+          "description": "Message-port delivery between components.",
+          "required": ["port", "to"],
+          "additionalProperties": false,
+          "properties": {
+            "from": { "type": "string", "description": "Sending component id." },
+            "to": { "type": "string", "description": "Receiving component id." },
+            "port": { "type": "string", "description": "Receiving message input port." },
+            "payload": { "type": "object" }
+          }
+        }
+      ]
+    },
+    "valueChanged": {
+      "type": "object",
+      "required": ["port", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "port": { "type": "string", "description": "The value output port that published." },
+        "value": { "$ref": "#/$defs/stateValue" }
+      }
+    },
+    "stateValue": {
+      "type": ["number", "boolean", "string"],
+      "description": "A value that matches a library observable state type. JSON numbers represent both number and integer state."
+    },
+    "recordedValue": {
+      "type": ["number", "boolean", "string", "null"],
+      "description": "A recorder telemetry value, or null when no value is available."
+    }
+  }
+}

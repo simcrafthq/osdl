@@ -1,0 +1,133 @@
+{
+  "$schema": "https://osdl.dev/schemas/0.1/osdl.library.schema.json",
+  "osdl": "0.1",
+  "library": {
+    "namespace": "sd",
+    "name": "System Dynamics Components",
+    "version": "0.1.0",
+    "description": "Stock-and-flow system dynamics on the shared kernel. Stocks accumulate, flows move quantity between stocks at expression-defined rates, and auxiliaries hold intermediate equations. Continuous dynamics are advanced by the kernel as scheduled integration micro-steps (see the model's `time.integration` settings), so they interleave deterministically with discrete events.",
+    "components": [
+      {
+        "name": "stock",
+        "label": "Stock",
+        "description": "An accumulation (level). Its value integrates the difference between connected inflows and outflows. Wire `flow.out → stock.in` for inflows and `stock.out → flow.in` for outflows. The current level is observable and referenceable as `<id>.value`.",
+        "category": "Stock & Flow",
+        "ports": [
+          {
+            "id": "in",
+            "direction": "in",
+            "multiple": true,
+            "description": "Inflows accumulate into this stock."
+          },
+          {
+            "id": "out",
+            "direction": "out",
+            "multiple": true,
+            "description": "Outflows drain from this stock."
+          }
+        ],
+        "params": {
+          "type": "object",
+          "required": [
+            "initial"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "initial": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/numericValue",
+              "description": "Level at simulation start."
+            },
+            "min": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/scalarValue",
+              "description": "Lower clamp on the level."
+            },
+            "max": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/scalarValue",
+              "description": "Upper clamp on the level."
+            },
+            "nonNegative": {
+              "type": "boolean",
+              "default": false,
+              "description": "Shorthand for `min: 0`."
+            }
+          }
+        },
+        "state": [
+          {
+            "id": "value",
+            "type": "number",
+            "description": "The current level."
+          }
+        ],
+        "emits": []
+      },
+      {
+        "name": "flow",
+        "label": "Flow",
+        "description": "Moves quantity between stocks at `rate` (per model time unit), re-evaluated every integration step. An unconnected `in` draws from an unlimited source (cloud); an unconnected `out` drains to an unlimited sink. A negative rate reverses direction.",
+        "category": "Stock & Flow",
+        "ports": [
+          {
+            "id": "in",
+            "direction": "in",
+            "description": "Connect from the upstream stock's `out` port; leave unconnected for a source (cloud)."
+          },
+          {
+            "id": "out",
+            "direction": "out",
+            "description": "Connect to the downstream stock's `in` port; leave unconnected for a sink (cloud)."
+          }
+        ],
+        "params": {
+          "type": "object",
+          "required": [
+            "rate"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "rate": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/numericValue",
+              "description": "Quantity moved per model time unit; typically an expression over stocks, auxiliaries, parameters, and other components' state."
+            }
+          }
+        },
+        "state": [
+          {
+            "id": "rate",
+            "type": "number",
+            "description": "The most recently evaluated rate."
+          }
+        ],
+        "emits": []
+      },
+      {
+        "name": "auxiliary",
+        "label": "Auxiliary",
+        "description": "A named intermediate value, re-evaluated every integration step and whenever read. Auxiliaries have no ports; other components reference them in expressions as `<id>.value`. Useful for breaking complex equations apart and for bridging paradigms (e.g. deriving a server capacity from a stock level).",
+        "category": "Stock & Flow",
+        "ports": [],
+        "params": {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "$ref": "https://osdl.dev/schemas/0.1/osdl.schema.json#/$defs/numericValue",
+              "description": "The auxiliary's equation: a constant, parameter reference, expression, or distribution."
+            }
+          }
+        },
+        "state": [
+          {
+            "id": "value",
+            "type": "number",
+            "description": "The most recently evaluated value."
+          }
+        ],
+        "emits": []
+      }
+    ]
+  }
+}

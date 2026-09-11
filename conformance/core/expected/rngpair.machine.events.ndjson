@@ -1,0 +1,4 @@
+{"v":"0.1","time":0,"type":"sim.started","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"model":"rngpair","duration":1,"seed":20260702}}
+{"v":"0.1","time":0,"type":"machine.draws","source":"a","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"draws":["13783839991484394830","11268918191723552664","13386761933215218490","11786999878893370076"]}}
+{"v":"0.1","time":0,"type":"machine.draws","source":"b","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"draws":["10524509612679504224","17662094055660081926","5819969002872036014","11600577006935752814"]}}
+{"v":"0.1","time":0,"type":"sim.completed","source":"kernel","run":{"experiment":"workload","replication":1,"scenario":0},"payload":{"reason":"quiescent"}}
