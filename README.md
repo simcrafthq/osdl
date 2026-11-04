@@ -7,6 +7,8 @@
 
 # Open Simulation Definition Language
 
+[![Lean conformance tests](https://github.com/simcrafthq/osdl/actions/workflows/validate.yml/badge.svg)](https://github.com/simcrafthq/osdl/actions/workflows/validate.yml)
+
 The Open Simulation Definition Language (OSDL) is a vendor-neutral JSON format
 for discrete-event, agent-based, system dynamics, and hybrid simulation models.
 This repository defines OSDL version `0.1`, which is a draft.
